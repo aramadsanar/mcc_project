@@ -4,24 +4,39 @@ const mysql = require('mysql');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 
-var connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'users'
-});
+// var connection = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'password',
+//   database: 'mcsmcc'
+// });
+
+async function getConnection() {
+  var connection = await require('../dbconnection/dbconnection')();
+  return connection;
+}
+
+
+router.use(require('express-session')({
+  secret: 'mcsmcc',
+  resave: false,
+  saveUninitialized: false
+}));
 
 
 router.use(passport.initialize());
+router.use(passport.session());
 
 passport.use(new FacebookStrategy({
   clientID : '747468575621088',
   clientSecret : '484f81f9838716c15e4eb7ced9035912',
-  callbackURL: 'https://2c1ae7dd.ap.ngrok.io/authFacebook/done',
+  callbackURL: 'https://ca450ce0.ap.ngrok.io/authFacebook/done',
   profileFields: ['id', 'name', 'email', 'photos']
 }, function(accessToken, refreshToken, profile, done){
   return done(null, profile);
 }))
+
+
 
 passport.serializeUser(function(profile,done){
   return done(null, profile);
@@ -32,34 +47,38 @@ passport.deserializeUser(function(profile,done){
 })
 
 router.get('/authFacebook', passport.authenticate('facebook'));
+
 router.get('/authFacebook/done', 
-passport.authenticate('facebook', {
-  failureRedirect: '/'
-}),function(req,res){
-  console.log(req.user)
-  let fbid = req.user.id;
-  let user = connection.query("SELECT * FROM user WHERE fbid=?", [fbid], (err, result) => {
-    if (err) {
+  passport.authenticate('facebook', {
+    failureRedirect: '/'
+  }),
+  async (req,res) => {
+    let connection = await getConnection();
+    console.log(req.user)
+    let fbid = req.user.id;
+    try {
+      let [user, fields] = await connection.execute("SELECT * FROM users WHERE fbid=?", [fbid]);
+    
+      if (user) {
+        if (user.length == 0) {
+          res.redirect('/register?fbid=' + fbid);
+        }
+        else {
+          //udah regis
+          res.redirect('/home?id=' + user[0].id);
+        }
+      }
+    }
+
+    catch (err) {
+      console.log(err.message);
       res.redirect('/');
     }
-    if (result) {
-      if (result.length == 0) {
-        //belom regis
-        res.redirect('/register?fbid=' + fbid);
-      }
-      else {
-        //udah regis
-        res.redirect('/home?id=' + result[0].id);
-      }
-    }
-  });
-
-
-
-  //return res.json(req.user);
-});
+  }
+);
 
 router.get('/home', (req, res) => {
+  if (req.user) console.log(req.user)
   res.render('home')
 })
 
@@ -67,22 +86,123 @@ router.get('/register', (req, res) => {
   res.render('register');
 })
 
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
+  console.log(req.user)
   var username = req.body.username;
   var password = req.body.password;
   var fbid = req.body.fbid;
+  let connection = await getConnection();
 
-  connection.query("INSERT INTO user(fbid, name, password) VALUES (?, ?, ?)", [fbid, username, password], (err, result) => {
-    if (err) {
-      return res.json({msg: 'error'})
-    } 
-    else {
-      return res.json({msg: 'success'});
-    }
-  });
+  try {
+    await connection.execute("INSERT INTO users(fbid, username, email, password) VALUES (?, ?, ?, ?)", [fbid, username, fbid, password]);
+  
+    return res.json({msg: 'success'});
+  }
+  catch (error) {
+    console.log(error.message);
 
+    return res.json({msg: 'error'})
+  }
 
   console.log(req.body.username);
+})
+
+
+router.get('/courses', async (req, res) => {
+  console.log(req.user)
+  if (req.user) {
+    let connection = await getConnection();
+
+    let [courses, fields] = await connection.execute(`
+      SELECT id, main_course_name, course_name, description FROM courses
+    `)
+
+    res.send(courses);
+  }
+  else {
+    res.send({error: 'not authenticated'})
+  }
+})
+
+router.get('/detail_courses', async (req, res) => {
+  if (req.body.course_id) {
+    let connection = await getConnection();
+
+    let [courses, fields] = await connection.execute(
+      `SELECT id, main_course_name, course_name, description, link FROM courses WHERE id=?`,
+      [req.body.course_id]
+    )
+
+    res.send(courses);
+  }
+  else {
+    return res.status(400).send('no course id supplied!')
+  }
+})
+
+router.post('/user_courses', async(req, res) => {
+  if (req.body.user_id) {
+    let connection = await getConnection();
+
+    let [user_courses, fields] = await connection.execute(`SELECT * FROM course_history JOIN courses ON course_id=courses.id WHERE user_id=?`, [req.body.user_id]);
+
+    let userCourseHistory = {
+      user_id: req.body.user_id,
+      courses: []
+    }
+
+    let courses = []
+    for (user_course of user_courses) {
+      console.log(user_course)
+
+      let courseEntry = {
+        id: user_course.id,
+        main_course_name: user_course.main_course_name,
+        course_name: user_course.course_name,
+        description: user_course.description
+      };
+
+      courses.push(courseEntry);
+    }
+
+
+    userCourseHistory.courses = courses;
+
+    res.send(userCourseHistory);
+  }
+  else {
+    return res.status(400).send('no user id supplied!')
+  }
+})
+
+router.post('/assign_course', async(req, res) => {
+  if (req.body.user_id && req.body.course_id) {
+    let connection = await getConnection();
+    try {
+      let [alreadyAssigned, fields] = await connection.execute('SELECT * FROM course_history WHERE user_id=? AND course_id=?', [req.body.user_id, req.body.course_id]);
+
+      if (alreadyAssigned.length > 0) {
+        return res.send({
+          status: "failed",
+          reason: "user already assigned course"
+        })
+      }
+
+
+      await connection.execute('INSERT INTO course_history(user_id, course_id) VALUES(?, ?)', [req.body.user_id, req.body.course_id]);
+    
+      return res.send({
+        user_id: req.body.user_id,
+        course_id: req.body.course_id,
+        status: "success"
+      })
+    } 
+    catch (error) {
+      console.log(error.message);
+
+      return res.status(500).send("internal error");
+    }
+  }
 })
 
 /* GET home page. */
