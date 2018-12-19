@@ -3,13 +3,7 @@ var router = express.Router();
 const mysql = require('mysql');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
-
-// var connection = mysql.createConnection({
-//   host: 'localhost',
-//   user: 'root',
-//   password: 'password',
-//   database: 'mcsmcc'
-// });
+var LocalStrategy = require('passport-local').Strategy;
 
 async function getConnection() {
   var connection = await require('../dbconnection/dbconnection')();
@@ -27,6 +21,30 @@ router.use(require('express-session')({
 router.use(passport.initialize());
 router.use(passport.session());
 
+passport.use(
+  new LocalStrategy(
+    async (username, password, done) => {
+      let connection = await getConnection();
+      let [user, fields] = await connection.execute('SELECT id, username, password FROM users WHERE username=?', [username])
+
+      if (user) {
+        if (user.length > 0) {
+          if (user[0].password == password) {
+            return done(null, user)
+          }
+          else {
+            return done(null, false);
+          }
+        }
+
+        else {
+          return done(null, false);
+        }
+      }
+    }
+  )
+)
+
 passport.use(new FacebookStrategy({
   clientID : '747468575621088',
   clientSecret : '484f81f9838716c15e4eb7ced9035912',
@@ -36,7 +54,7 @@ passport.use(new FacebookStrategy({
   return done(null, profile);
 }))
 
-
+//passport.use(new Local)
 
 passport.serializeUser(function(profile,done){
   return done(null, profile);
@@ -46,7 +64,31 @@ passport.deserializeUser(function(profile,done){
   return done(null, profile);
 })
 
-router.get('/authFacebook', passport.authenticate('facebook'));
+router.get('/authLocal', async (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.redirect('/home?id=' + req.user[0].id);
+  }
+  return res.render('loginLocal');
+})
+
+router.post(
+  '/authLocal', 
+  passport.authenticate('local', {
+    failureRedirect: '/'
+  }),
+  async(req, res) => {
+    console.log("usernya local: ", req.user[0]);
+    if (req.isAuthenticated()) res.send(req.user[0])
+  }
+)
+
+router.get('/aboutMe', async (req, res) => {
+  res.send(req.user)
+})
+
+router.get('/authFacebook', passport.authenticate('facebook', {
+  scope: ['email']
+}));
 
 router.get('/authFacebook/done', 
   passport.authenticate('facebook', {
@@ -91,10 +133,11 @@ router.post('/register', async (req, res) => {
   var username = req.body.username;
   var password = req.body.password;
   var fbid = req.body.fbid;
+  var email = req.user._json.email;
   let connection = await getConnection();
 
   try {
-    await connection.execute("INSERT INTO users(fbid, username, email, password) VALUES (?, ?, ?, ?)", [fbid, username, fbid, password]);
+    await connection.execute("INSERT INTO users(fbid, username, email, password) VALUES (?, ?, ?, ?)", [fbid, username, email, password]);
   
     return res.json({msg: 'success'});
   }
@@ -109,8 +152,8 @@ router.post('/register', async (req, res) => {
 
 
 router.get('/courses', async (req, res) => {
-  console.log(req.user)
-  if (req.user) {
+  // console.log(req.user)
+  // if (req.user) {
     let connection = await getConnection();
 
     let [courses, fields] = await connection.execute(`
@@ -118,10 +161,10 @@ router.get('/courses', async (req, res) => {
     `)
 
     res.send(courses);
-  }
-  else {
-    res.send({error: 'not authenticated'})
-  }
+  //}
+  // else {
+  //   res.send({error: 'not authenticated'})
+  // }
 })
 
 router.get('/detail_courses', async (req, res) => {

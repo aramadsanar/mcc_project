@@ -90,6 +90,8 @@ async function insertCourseData() {
 async function doMigration() {
     const dbConnection = await createDbConnection();
 
+
+
     let createCourseTableCommand = `
         CREATE TABLE IF NOT EXISTS courses (
             id INT AUTO_INCREMENT PRIMARY KEY,
