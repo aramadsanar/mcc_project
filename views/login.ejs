@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bluecademy</title>
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="javascripts/login.js"></script>
+</head>
+
+<body>
+    <div data-role="page">
+
+        <div data-role="header">
+            <h1>Bluecademy</h1>
+        </div>    
+
+        <div data-role="contain">
+                
+            <form id="form_login" data-ajax-"false">
+                <input type="email" name="email" id="email" placeholder="Email" required>
+                <input type="password" name="password" id="password" placeholder="Password" required>
+                <input type="submit" id= "loginBtn" name="loginBtn" value="Login">
+            </form>
+
+            <input type="submit" id= "facebookBtn" name="facebookBtn" value="Facebook Login">
+
+            <center><a id="registrationForm" data-ajax-"false">Sign Up</a> </center>
+            
+            
+        </div>
+
+    </div>
+    
+</body>
+
+
+</html>

@@ -248,9 +248,26 @@ router.post('/assign_course', async(req, res) => {
   }
 })
 
+router.get('/regis', function(req, res, next) {
+  res.render('regis', { title: 'Express' });
+});
+
+router.get('/Homepage', function(req, res, next) {
+  res.render('Homepage', { title: 'Express' });
+});
+
+router.get('/MyCourse', function(req, res, next) {
+  res.render('MyCourse', { title: 'Express' });
+});
+
+router.get('/viewDetail', function(req, res, next) {
+  res.render('viewDetail', { title: 'Express' });
+});
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('login', { title: 'Express' });
 });
+
 
 module.exports = router;

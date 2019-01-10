@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>View Detail Course</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="javascripts/viewDetail.js"></script>
+</head>
+<body>
+
+    <div data-role="page" data-theme="a">
+
+        <header data-role="header">
+        
+            <h1>Course Detail</h1>
+            <a id="homeLink" data-ajax="false" data-role="button">Home</a>
+
+            <nav data-role="navbar">
+                <ul>
+                    <li>
+                        <a id="myCourseLink" data-icon="home" data-ajax="false">My Course</a>
+                    </li>
+                    <li>
+                        <a id="logoutLink" data-icon="delete" data-ajax="false">Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        
+        </header>
+        
+        <main data-role="content" data-position="inline">
+
+            <div id="course">
+                <h1 id="main_course">Main Course</h1>
+                <hr>
+                <h2 id="course_name">Course Name</h2>
+                <iframe id="course_video" height="500px" width="100%"></iframe>
+                <h2 id="course_desc">Course Description</h2>
+                <a id="add_button" data-role="button"> Add Course </a>
+            </div>
+
+        </main>
+        
+                        
+    </div>
+
+</body>
+</html>

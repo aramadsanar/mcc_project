@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Registration</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="javascripts/regis.js"></script>
+</head>
+<body>
+    <div data-role="page">
+
+        <div data-role="header">
+            <h1>Registration Form</h1>
+        </div>    
+
+        <div data-role="contain">
+                
+            <form id="form_login" data-ajax-"false">
+                <input type="hidden" name="fbID" id="fbId">
+                <input type="text" id= "name" name="name" value="" placeholder="Name" title="five or more characters" required minlength="5">
+                <input type="email" id= "email" name="email" value="" placeholder="Your Email" required>
+                <!--required buat memastikan field jangan kosong-->
+                <input type="password" id="password" name="password" placeholder="Password" required minlength="7" >
+                <input type="password" id="Repassword" name="Repassword" placeholder="Confirm Password" required >
+                <input type="number" id="phoneNum" name="phoneNum" placeholder="Phone Number" required minlength="8" maxlength="16" >
+
+                <!--value untuk isi di dalam button-->
+                <input type="submit" id="SignUp" name="SignUp" value="Sign Up">
+            </form>
+
+            <center><a id="SignIn" data-ajax-"false">Sign In</a> </center>
+            
+            
+        </div>
+
+    </div>
+    
+</body>
+
+</html>

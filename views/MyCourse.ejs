@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Course PAGE</title>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="javascripts/myCourse.js"></script>
+</head>
+
+<body>
+
+    <div data-role="page" data-theme="a">
+
+        <header data-role="header">
+            <h1>My Course</h1>
+
+            <nav data-role="navbar">
+
+                <ul>
+                    <li>
+                        <a id="homeLink" data-icon="home" data-ajax="false">HOME</a>
+                    </li>
+                    <li>
+                         <a id="logoutLink" data-icon="delete" data-ajax="false">Logout</a>
+                    </li>
+                </ul>
+
+            </nav>
+
+        </header>
+
+        <main data-role="content" data-position="inline">
+
+            <div>
+                <center><h2>My Course List</h2></center>
+                <ul id="lv_course" data-role="listview" data-insert="true"></ul>
+            </div>
+
+        </main>
+        
+    </div>
+        
+</body>
+
+</html>
